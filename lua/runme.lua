@@ -1,4 +1,4 @@
-
+local vim = vim
 ---@type integer win id
 local win
 
@@ -100,10 +100,6 @@ local function open_window(cmd_args)
     win_height = runme.config.height
   end
 
-  -- pass through calculated window width
-  table.insert(cmd_args, "-w")
-  table.insert(cmd_args, win_width)
-
   local win_opts = {
     style = "minimal",
     relative = "editor",
@@ -121,6 +117,7 @@ local function open_window(cmd_args)
   vim.api.nvim_win_set_option(win, "winblend", 0)
   vim.api.nvim_buf_set_option(buf, "bufhidden", "wipe")
   vim.api.nvim_buf_set_option(buf, "filetype", "runmepreview")
+
 
   -- keymaps
   local keymaps_opts = { silent = true, buffer = buf }
@@ -166,9 +163,6 @@ local function open_window(cmd_args)
   vim.loop.read_start(job.stdout, vim.schedule_wrap(on_output))
   vim.loop.read_start(job.stderr, vim.schedule_wrap(on_output))
 
-  if runme.config.pager then
-    vim.cmd("startinsert")
-  end
 end
 
 ---@return string
@@ -274,15 +268,12 @@ local function run(opts)
 
   stop_job()
 
-  local cmd_args = { runme.config.runme_path }
-
-  table.insert(cmd_args, file)
-  open_window(cmd_args)
+  vim.fn.termopen(runme.config.runme_path)
+  --open_window(cmd_args)
 end
 
 local function install_runme(opts)
   local release_url = release_file_url()
-  vim.print(release_url)
   if release_url == "" then
     return
   end
