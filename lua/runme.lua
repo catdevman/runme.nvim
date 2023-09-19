@@ -223,9 +223,12 @@ local function is_md_ext(ext)
   return true
 end
 
-local function run(opts)
-  local file
+---@return string
+local function get_file_name(file)
+      return file:match "([^/]-([^.]+))$"
+end
 
+local function run(opts)
   -- check if runme binary is valid even if filled in config
   if vim.fn.executable(runme.config.runme_path) == 0 then
     err(
@@ -237,7 +240,7 @@ local function run(opts)
     return
   end
 
-  local filename = opts.fargs[1]
+    local filename = opts.fargs[1]
 
   if filename ~= nil and filename ~= "" then
     -- check file
@@ -249,12 +252,12 @@ local function run(opts)
 
     local ext = vim.fn.fnamemodify(file, ":e")
     if not is_md_ext(ext) then
-      err("preview only works on markdown files")
+      err("runme only works on markdown files")
       return
     end
   else
     if not is_md_ft() then
-      err("preview only works on markdown files")
+      err("runme only works on markdown files")
       return
     end
 
@@ -268,8 +271,7 @@ local function run(opts)
 
   stop_job()
 
-  vim.fn.termopen(runme.config.runme_path)
-  --open_window(cmd_args)
+  vim.fn.termopen(runme.config.runme_path .. ' --filename '.. get_file_name(vim.fn.expand("%")))
 end
 
 local function install_runme(opts)
